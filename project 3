@@ -1,0 +1,83 @@
+# ==========================
+# STEP 1: Install & Load Packages
+# ==========================
+install.packages("gsheet")
+install.packages("forecast")
+install.packages("tseries")
+install.packages("ggplot2")
+
+library(gsheet)
+library(forecast)
+library(tseries)
+library(ggplot2)
+
+# ==========================
+# STEP 2: Load Data from Google Sheets
+# ==========================
+sheet_url <- "https://docs.google.com/spreadsheets/d/1pz0uunF7l9SnWNpyPiHPa0rxxTll2ZrOOwOEg_kzh3c/export?format=csv"
+data <- read.csv(sheet_url)
+
+# View column names (optional)
+print(names(data))
+
+# ==========================
+# STEP 3: Convert to Time Series (Monthly, Apr 2022 - Mar 2023)
+# ==========================
+pm25_ts <- ts(data$PM2.5, start = c(2022, 4), frequency = 12)
+pm10_ts <- ts(data$PM10, start = c(2022, 4), frequency = 12)
+no2_ts  <- ts(data$NO2,  start = c(2022, 4), frequency = 12)
+so2_ts  <- ts(data$SO2,  start = c(2022, 4), frequency = 12)
+
+# ==========================
+# STEP 4: Stationarity Check using ADF Test
+# ==========================
+cat("ADF Test - PM2.5:\n"); print(adf.test(pm25_ts))
+cat("ADF Test - PM10:\n"); print(adf.test(pm10_ts))
+cat("ADF Test - NO2:\n");  print(adf.test(no2_ts))
+cat("ADF Test - SO2:\n");  print(adf.test(so2_ts))
+
+# ==========================
+# STEP 5: Fit ARIMA Models
+# ==========================
+model_pm25 <- auto.arima(pm25_ts)
+model_pm10 <- auto.arima(pm10_ts)
+model_no2  <- auto.arima(no2_ts)
+model_so2  <- auto.arima(so2_ts)
+
+# Print summaries
+cat("\nARIMA Summary - PM2.5:\n"); print(summary(model_pm25))
+cat("\nARIMA Summary - PM10:\n"); print(summary(model_pm10))
+cat("\nARIMA Summary - NO2:\n");  print(summary(model_no2))
+cat("\nARIMA Summary - SO2:\n");  print(summary(model_so2))
+
+# ==========================
+# STEP 6: Forecast for Next 12 Months
+# ==========================
+forecast_pm25 <- forecast(model_pm25, h = 12)
+forecast_pm10 <- forecast(model_pm10, h = 12)
+forecast_no2  <- forecast(model_no2, h = 12)
+forecast_so2  <- forecast(model_so2, h = 12)
+
+# ==========================
+# STEP 7: Plot Forecasts
+# ==========================
+autoplot(forecast_pm25) + ggtitle("PM2.5 Forecast (Next 12 Months)")
+autoplot(forecast_pm10) + ggtitle("PM10 Forecast (Next 12 Months)")
+autoplot(forecast_no2)  + ggtitle("NO2 Forecast (Next 12 Months)")
+autoplot(forecast_so2)  + ggtitle("SO2 Forecast (Next 12 Months)")
+
+# ==========================
+# STEP 8: Residual Diagnostics
+# ==========================
+checkresiduals(model_pm25)
+checkresiduals(model_pm10)
+checkresiduals(model_no2)
+checkresiduals(model_so2)
+
+# ==========================
+# STEP 9: Forecast Accuracy
+# ==========================
+cat("\nAccuracy - PM2.5:\n"); print(accuracy(forecast_pm25))
+cat("\nAccuracy - PM10:\n"); print(accuracy(forecast_pm10))
+cat("\nAccuracy - NO2:\n");  print(accuracy(forecast_no2))
+cat("\nAccuracy - SO2:\n");  print(accuracy(forecast_so2))
