@@ -14,7 +14,7 @@ library(ggplot2)
 # ==========================
 # STEP 2: Load Data from Google Sheets
 # ==========================
-sheet_url <- "https://docs.google.com/spreadsheets/d/1pz0uunF7l9SnWNpyPiHPa0rxxTll2ZrOOwOEg_kzh3c/export?format=csv"
+sheet_url <- "https://docs.google.com/spreadsheets/d/1W1JJep1OVgW-CWZOwafHlI0ztXzrs92pbGZsBtbK0fA/edit?gid=0#gid=0"
 data <- read.csv(sheet_url)
 
 # View column names (optional)
